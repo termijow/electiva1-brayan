@@ -32,7 +32,7 @@ public class ProductController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PostMapping({"/", "/products"})
+    @PostMapping({"/", "/products"}) 
     public Product create(@RequestParam String name, @RequestParam double price) {
         return productService.createProduct(name, price);
     }
