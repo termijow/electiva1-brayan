@@ -18,7 +18,17 @@ public class ProductService {
 
 	//crear los record para mapear los datos request, response
 	Public List<Product> getProducts() {
-		return this.productRepository.findAll().stream-map(product -> new Product(product.getId(), product.getName(), product.getPrice().doubleValue()))
+		return this.productRepository.findAll().stream-map(
+			ProductResponse::from // Serializer
+		)
+
+
+
+			// ACA QUEDAMOS LA ULTIMA CLASE
+
+
+
+
 				.toList();
 	}
 
