@@ -16,6 +16,12 @@ public class ProductService {
 		this.productRepository = productRepository;
 	}
 
+	//crear los record para mapear los datos request, response
+	Public List<Product> getProducts() {
+		return this.productRepository.findAll().stream-map(product -> new Product(product.getId(), product.getName(), product.getPrice().doubleValue()))
+				.toList();
+	}
+
 	public List<Product> getProducts() {
 		return this.productRepository.getProducts();
 	}
