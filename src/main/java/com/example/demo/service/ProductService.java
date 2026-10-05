@@ -1,52 +1,42 @@
 package com.example.demo.service;
 
 import com.example.demo.model.Product;
+import com.example.demo.model.ProductResponse;
 import com.example.demo.repository.ProductRepository;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 public class ProductService {
-	private final ProductRepository productRepository;
+    private final ProductRepository productRepository;
 
-	// Investigar como podemos mejorar esto "automatizarlo" (por ejemplo con Lombok @RequiredArgsConstructor)
-	public ProductService(ProductRepository productRepository) {
-		this.productRepository = productRepository;
-	}
+    public ProductService(ProductRepository productRepository) {
+        this.productRepository = productRepository;
+    }
 
-	//crear los record para mapear los datos request, response
-	Public List<Product> getProducts() {
-		return this.productRepository.findAll().stream-map(
-			ProductResponse::from // Serializer
-		)
+    public List<ProductResponse> getProducts() {
+        return this.productRepository.findAll().stream()
+                .map(ProductResponse::from)
+                .toList();
+    }
 
+    public Optional<ProductResponse> getProductById(Long id) {
+        return this.productRepository.findById(id)
+                .map(ProductResponse::from);
+    }
 
+    public ProductResponse createProduct(String name, BigDecimal price) {
+        if (name == null || name.isBlank()) {
+            throw new IllegalArgumentException("El nombre es requerido");
+        }
+        if (price == null || price.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("El precio no puede ser un valor negativo o cero");
+        }
 
-			// ACA QUEDAMOS LA ULTIMA CLASE
-
-
-
-
-				.toList();
-	}
-
-	public List<Product> getProducts() {
-		return this.productRepository.getProducts();
-	}
-
-	public Optional<Product> getProductById(Long id) {
-		return this.productRepository.getProductById(id);
-	}
-
-	public Product createProduct(String name, double price) {
-		if (name == null || name.isBlank()) {
-			throw new IllegalArgumentException("El nombre es requerido");
-		}
-		if (price <= 0) {
-			throw new IllegalArgumentException("El precio no puede ser un valor negativo");
-		}
-		return this.productRepository.saveProduct(name, price);
-	}
+        Product productSave = this.productRepository.save(new Product(name, price));
+        return ProductResponse.from(productSave);
+    }
 }

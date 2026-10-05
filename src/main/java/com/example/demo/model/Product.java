@@ -13,7 +13,7 @@ import java.math.BigDecimal;
 @Entity
 @Table(name = "products")
 
-public class Product(Long id,String nombre ,double precio) {
+public class Product {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY) // Generar el ID de forma automatica
@@ -29,7 +29,7 @@ public class Product(Long id,String nombre ,double precio) {
     @Positive
     @Column(nullable = false, precision = 12, scale = 2)
     private BigDecimal price;
-84
+
     protected Product() {
         // Constructor por defecto requerido por JPA
     }
