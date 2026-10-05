@@ -30,8 +30,11 @@ public class Product {
     @Column(nullable = false, precision = 12, scale = 2)
     private BigDecimal price;
 
+    @Column(nullable = true, length = 225)
+    private String description;
+
     protected Product() {
-        // Constructor por defecto requerido por JPA
+        // Constructor por defecto requerido por JP
     }
 
     public Product(String name, BigDecimal price) {
