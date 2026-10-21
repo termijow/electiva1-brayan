@@ -32,6 +32,11 @@
 set -euf
 [ "${MVNW_VERBOSE-}" != debug ] || set -x
 
+if [ -z "${JAVA_HOME-}" ] && [ -d "/usr/lib/jvm/java-21-openjdk" ]; then
+  JAVA_HOME="/usr/lib/jvm/java-21-openjdk"
+  export JAVA_HOME
+fi
+
 # OS specific support.
 native_path() { printf %s\\n "$1"; }
 case "$(uname)" in

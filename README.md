@@ -1,171 +1,262 @@
-# Electiva 1 - Spring Boot & Java 25
+# Tienda API - Carrito de Compras y Gestión de Productos
 
-API REST para la gestión de productos desarrollada con **Spring Boot** y **Java 25**.
-
----
-
-## 1. Requisitos Previos
-
-Para ejecutar este proyecto necesitas tener instalado en tu sistema:
-
-### A. Java Development Kit (JDK 25)
-- Se requiere **Java 25** (ejemplo: *Eclipse Temurin OpenJDK 25*).
-- Puedes descargarlo desde [Adoptium](https://adoptium.net/) o directamente desde **IntelliJ IDEA** (*File > Project Structure > SDKs > Add SDK > Download JDK*).
-
-Para verificar si ya lo tienes instalado y reconocido por la terminal:
-```powershell
-java -version
-```
-
-### B. Gestor de Construcción (Maven)
-- **No es necesario instalar Maven por separado**. El proyecto incluye el **Maven Wrapper** (`mvnw` y `mvnw.cmd`), el cual descarga y utiliza automáticamente la versión correcta.
+API RESTful desarrollada con **Spring Boot** y **PostgreSQL** para la administración de un catálogo de productos y el flujo completo de compras mediante carrito de compras (pedidos y detalle de pedidos). El proyecto implementa una arquitectura por capas desacoplada, persistencia con Spring Data JPA y eliminación del 100 % del código repetitivo mediante la librería **Lombok**.
 
 ---
 
-## 2. Configuración de Variables de Entorno (Windows)
+## 1. Tecnologías Empleadas y Versiones
 
-Si Java está instalado pero tu terminal no reconoce el comando `java`, puedes configurarlo ejecutando los siguientes comandos en PowerShell:
-
-```powershell
-# Establecer JAVA_HOME en las variables de usuario
-[System.Environment]::SetEnvironmentVariable('JAVA_HOME', 'C:\Users\Juan\.jdks\temurin-25.0.4.1', 'User')
-
-# Agregar la carpeta bin al Path del usuario
-$currentPath = [System.Environment]::GetEnvironmentVariable('Path', 'User')
-if ($currentPath -notlike "*temurin-25.0.4.1\bin*") {
-    $newPath = "$currentPath;C:\Users\Juan\.jdks\temurin-25.0.4.1\bin"
-    [System.Environment]::SetEnvironmentVariable('Path', $newPath, 'User')
-}
-```
-
-> **Nota:** Tras ejecutarlo, abre una nueva ventana de terminal para que los cambios surtan efecto.
-
----
-
-## 3. Paso a Paso para Levantar el Proyecto
-
-### Opción A: Desde la Terminal (Recomendado)
-
-1. Abre una terminal (PowerShell o CMD) en la carpeta raíz del proyecto:
-   ```powershell
-   cd C:\Users\Juan\Downloads\demo\demo
-   ```
-
-2. Ejecuta la aplicación mediante Maven Wrapper:
-   - **En Windows (PowerShell / CMD):**
-     ```powershell
-     .\mvnw.cmd spring-boot:run
-     ```
-   - **En Linux / macOS:**
-     ```bash
-     ./mvnw spring-boot:run
-     ```
-
-3. El servidor iniciará en el puerto **8081**:
-   ```text
-   Tomcat initialized with port 8081 (http)
-   Started DemoApplication in ... seconds
-   ```
-
-4. **Para detener el servidor:** Presiona `Ctrl + C` en la terminal.
-
----
-
-### Opción B: Desde IntelliJ IDEA
-
-1. Abre la carpeta del proyecto en **IntelliJ IDEA**.
-2. Verifica que el SDK del proyecto esté configurado en Java 25 (*File > Project Structure > Project > SDK*).
-3. Abre el archivo `src/main/java/com/example/demo/DemoApplication.java`.
-4. Haz clic en el botón verde de **Run (Play)** al lado de la clase o método `main`.
-
----
-
-## 4. Comandos de Maven Wrapper
-
-| Acción | Windows (PowerShell / CMD) | Linux / macOS |
+| Tecnología | Versión | Propósito |
 | :--- | :--- | :--- |
-| **Compilar el proyecto** | `.\mvnw.cmd compile` | `./mvnw compile` |
-| **Ejecutar pruebas** | `.\mvnw.cmd test` | `./mvnw test` |
-| **Limpiar y compilar** | `.\mvnw.cmd clean compile` | `./mvnw clean compile` |
-| **Generar archivo JAR** | `.\mvnw.cmd clean package` | `./mvnw clean package` |
-| **Ejecutar el JAR generado** | `java -jar target/demo-0.0.1-SNAPSHOT.jar` | `java -jar target/demo-0.0.1-SNAPSHOT.jar` |
+| **Java Development Kit (JDK)** | OpenJDK 21 LTS | Lenguaje base de desarrollo |
+| **Spring Boot** | 4.1.x / 3.x | Framework de aplicaciones Java y servidor embebido Tomcat |
+| **Spring Data JPA / Hibernate** | 7.x / 6.x | Mapeo objeto-relacional (ORM) y persistencia |
+| **PostgreSQL** | 17.x / 16.x | Motor de base de datos relacional |
+| **Project Lombok** | 1.18.x | Reducción de código repetitivo (getters, setters, builders, inyección) |
+| **Apache Maven** | 3.9+ (mvnw wrapper) | Gestión de dependencias y construcción del proyecto |
+| **Docker & Docker Compose** | 27+ | Despliegue de contenedor para base de datos y pgAdmin |
 
 ---
 
-## 5. Configuración del Servidor
+## 2. Instrucciones de Configuración y Ejecución
 
-- **Puerto:** `8081`
-- **Archivo de configuración:** `src/main/resources/application.properties`
+### 2.1 Requisitos Previos
+- Docker y Docker Compose instalados, o PostgreSQL instalado localmente en el puerto `5432`.
+- JDK 17 o 21 configurado en el entorno.
+
+### 2.2 Despliegue de la Base de Datos con Docker Compose
+El proyecto incluye un archivo `docker-compose.yml` que levanta automáticamente PostgreSQL y pgAdmin:
+
+```bash
+# Iniciar servicios de PostgreSQL y pgAdmin en segundo plano
+docker compose up -d
+```
+
+Si se usa una instancia local de PostgreSQL, ingresar a la consola `psql` o a pgAdmin y crear la base de datos:
+```sql
+CREATE DATABASE tienda_db;
+CREATE USER postgres WITH SUPERUSER PASSWORD 'postgres';
+GRANT ALL PRIVILEGES ON DATABASE tienda_db TO postgres;
+```
+
+### 2.3 Configuración de Conexión (`application.properties`)
+El archivo `src/main/resources/application.properties` se encuentra parametrizado con los datos estándar:
 
 ```properties
-spring.application.name=demo
-server.port=8081
+spring.application.name=api-tienda
+server.port=8080
+
+spring.datasource.url=jdbc:postgresql://localhost:5432/tienda_db
+spring.datasource.username=postgres
+spring.datasource.password=postgres
+spring.datasource.driver-class-name=org.postgresql.Driver
+
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.format_sql=true
 ```
 
-> Se configuró el puerto `8081` para evitar colisiones con Docker Desktop, WSL u otros servicios locales que suelen utilizar el puerto `8080`.
+### 2.4 Compilación y Ejecución
+Para compilar y ejecutar el proyecto mediante el Maven Wrapper:
 
----
+```bash
+# Compilar y ejecutar pruebas unitarias
+./mvnw clean test
 
-## 6. Endpoints de la API y Ejemplos de Prueba
-
-La API se encuentra escuchando en `http://localhost:8081`.
-
-### A. Listar todos los productos
-- **Método:** `GET`
-- **Ruta:** `/products` (o `/`)
-- **PowerShell:**
-  ```powershell
-  Invoke-RestMethod -Uri "http://localhost:8081/products"
-  ```
-- **cURL:**
-  ```bash
-  curl -X GET http://localhost:8081/products
-  ```
-
----
-
-### B. Crear un producto
-- **Método:** `POST`
-- **Ruta:** `/products?name={nombre}&price={precio}`
-- **Parámetros de consulta:**
-  - `name`: Nombre del producto (Obligatorio).
-  - `price`: Precio numérico mayor a cero (Obligatorio).
-- **PowerShell:**
-  ```powershell
-  Invoke-RestMethod -Method Post -Uri "http://localhost:8081/products?name=Teclado%20Mecanico&price=250000"
-  ```
-- **cURL:**
-  ```bash
-  curl -X POST "http://localhost:8081/products?name=Teclado%20Mecanico&price=250000"
-  ```
-
----
-
-### C. Consultar producto por ID
-- **Método:** `GET`
-- **Ruta:** `/products/{id}`
-- **PowerShell:**
-  ```powershell
-  Invoke-RestMethod -Uri "http://localhost:8081/products/1"
-  ```
-- **cURL:**
-  ```bash
-  curl -X GET http://localhost:8081/products/1
-  ```
-
----
-
-## 7. Estructura del Proyecto
-
-```text
-src/main/java/com/example/demo/
-├── DemoApplication.java         # Clase principal con @SpringBootApplication y main()
-├── controller/
-│   └── ProductController.java  # Controlador REST con endpoints GET y POST
-├── service/
-│   └── ProductService.java     # Lógica de negocio y validaciones
-├── repository/
-│   └── ProductRepository.java  # Repositorio en memoria (List)
-└── model/
-    └── Product.java            # Record con el modelo de datos (id, nombre, precio)
+# Iniciar la aplicación
+./mvnw spring-boot:run
 ```
+
+La aplicación arrancará sobre el puerto `8080` y Tomcat responderá en `http://localhost:8080`.
+
+---
+
+## 3. Modelo de Datos y Reglas de Negocio
+
+### 3.1 Modelo Entidad-Relación
+
+```
++-----------------------------------+
+|             productos             |
++-----------------------------------+
+| id : BIGINT (PK)                  |
+| nombre : VARCHAR(100) NOT NULL    |
+| descripcion : VARCHAR(255)        |
+| precio : NUMERIC(12, 2) NOT NULL  |
+| stock : INT NOT NULL              |
++-----------------------------------+
+                  ^
+                  |
+                  | 1:N
+                  |
++-----------------------------------+       1:N       +-----------------------------------+
+|          detalle_pedidos          | <-------------- |              pedidos              |
++-----------------------------------+                 +-----------------------------------+
+| id : BIGINT (PK)                  |                 | id : BIGINT (PK)                  |
+| pedido_id : BIGINT (FK) NOT NULL  |                 | cliente : VARCHAR(100) NOT NULL   |
+| producto_id : BIGINT (FK) NOT NULL|                 | fecha : TIMESTAMP                 |
+| cantidad : INT NOT NULL           |                 | estado : VARCHAR(20)              |
+| precio_unitario : NUMERIC(12, 2)  |                 | total : NUMERIC(12, 2)            |
+| subtotal : NUMERIC(12, 2)         |                 +-----------------------------------+
++-----------------------------------+
+```
+
+- **`productos`**: Catálogo de artículos disponibles con su precio unitario y cantidad en existencia (`stock`).
+- **`pedidos`**: Registro principal de la compra o carrito. Contiene el nombre del cliente, fecha, estado (`CARRITO`, `CONFIRMADO`, `CANCELADO`) y valor total acumulado.
+- **`detalle_pedidos`**: Tabla intermedia que asocia cada ítem del pedido con un producto del catálogo, guardando cantidad, precio vigente y subtotal.
+
+### 3.2 Reglas de Negocio Obligatorias
+1. **Cálculo de Totales en el Servidor**: El subtotal de cada ítem (`cantidad * precioUnitario`) y el total del pedido (`sum(subtotales)`) se calculan estrictamente en el backend, nunca son provistos por el cliente.
+2. **Validación de Cantidades**: Cualquier ítem con cantidad menor o igual a cero es rechazado con código `400 Bad Request`.
+3. **Restricción de Estados**: Solo los pedidos en estado `CARRITO` pueden ser modificados (agregar ítems, retirar ítems, actualizar o confirmar). Cualquier intento de modificación sobre un pedido `CONFIRMADO` retorna `400 Bad Request`.
+4. **Validación Transaccional de Inventario**: Al confirmar el pedido (`PATCH /api/pedidos/{id}/confirmar`), se verifica que todos los productos cuenten con stock suficiente. Si alguno no tiene existencias, la transacción se revierte íntegramente (`@Transactional`) y ningún stock se descuenta.
+5. **Integridad Referencial (Conflicto 409)**: No se permite eliminar un producto que forme parte del detalle de un pedido existente. El manejador global de excepciones captura la restricción de llave foránea y responde con `409 Conflict`.
+
+---
+
+## 4. Catálogo de Endpoints de la API
+
+La API expone un total de **13 endpoints** estructurados bajo el estándar RESTful:
+
+### 4.1 Módulo de Productos (`/api/productos`)
+
+| Método | Ruta | Código HTTP | Descripción |
+| :--- | :--- | :--- | :--- |
+| **GET** | `/api/productos` | `200 OK` | Listar todos los productos registrados |
+| **GET** | `/api/productos/{id}` | `200 OK` / `404 Not Found` | Consultar producto por su identificador único |
+| **POST** | `/api/productos` | `201 Created` | Crear un nuevo producto en el catálogo |
+| **PUT** | `/api/productos/{id}` | `200 OK` / `404 Not Found` | Actualizar los datos de un producto existente |
+| **DELETE** | `/api/productos/{id}` | `204 No Content` / `404` / `409` | Eliminar un producto (409 si está en pedidos) |
+
+#### Ejemplos de Petición y Respuesta - Productos
+
+**POST /api/productos**
+- **Cuerpo Petición:**
+  ```json
+  {
+    "nombre": "Teclado Mecánico RGB",
+    "descripcion": "Switches rojos, retroiluminado",
+    "precio": 189900.00,
+    "stock": 15
+  }
+  ```
+- **Respuesta (201 Created):**
+  ```json
+  {
+    "id": 1,
+    "nombre": "Teclado Mecánico RGB",
+    "descripcion": "Switches rojos, retroiluminado",
+    "precio": 189900.00,
+    "stock": 15
+  }
+  ```
+
+---
+
+### 4.2 Módulo de Pedidos y Carrito (`/api/pedidos`)
+
+| Método | Ruta | Código HTTP | Descripción |
+| :--- | :--- | :--- | :--- |
+| **GET** | `/api/pedidos` | `200 OK` | Listar todos los pedidos con su detalle |
+| **GET** | `/api/pedidos/{id}` | `200 OK` / `404 Not Found` | Consultar pedido por ID con subtotales y total |
+| **POST** | `/api/pedidos` | `201 Created` / `400 Bad Request` | Crear un carrito con cliente e ítems iniciales |
+| **PUT** | `/api/pedidos/{id}` | `200 OK` / `400` / `404` | Actualizar cliente y reemplazar ítems del carrito |
+| **DELETE** | `/api/pedidos/{id}` | `204 No Content` / `404` | Eliminar pedido y sus detalles en cascada |
+| **POST** | `/api/pedidos/{id}/items` | `200 OK` / `400` / `404` | Agregar un ítem de producto al carrito |
+| **DELETE** | `/api/pedidos/{id}/items/{itemId}` | `200 OK` / `404 Not Found` | Retirar un ítem del carrito y recalcular total |
+| **PATCH** | `/api/pedidos/{id}/confirmar` | `200 OK` / `400 Bad Request` | Confirmar compra y descontar existencias |
+
+#### Ejemplos de Petición y Respuesta - Pedidos
+
+**POST /api/pedidos**
+- **Cuerpo Petición:**
+  ```json
+  {
+    "cliente": "Brayan Gómez",
+    "items": [
+      { "productoId": 1, "cantidad": 2 },
+      { "productoId": 2, "cantidad": 1 }
+    ]
+  }
+  ```
+- **Respuesta (201 Created):**
+  ```json
+  {
+    "id": 1,
+    "cliente": "Brayan Gómez",
+    "fecha": "2026-10-19T09:16:58.689",
+    "estado": "CARRITO",
+    "total": 479700.00,
+    "items": [
+      {
+        "id": 1,
+        "producto": {
+          "id": 1,
+          "nombre": "Teclado Mecánico RGB",
+          "precio": 189900.00,
+          "stock": 15
+        },
+        "cantidad": 2,
+        "precioUnitario": 189900.00,
+        "subtotal": 379800.00
+      },
+      {
+        "id": 2,
+        "producto": {
+          "id": 2,
+          "nombre": "Mouse Gamer",
+          "precio": 79900.00,
+          "stock": 25
+        },
+        "cantidad": 1,
+        "precioUnitario": 79900.00,
+        "subtotal": 79900.00
+      }
+    ]
+  }
+  ```
+
+**POST /api/pedidos/{id}/items**
+- **Cuerpo Petición:**
+  ```json
+  {
+    "productoId": 3,
+    "cantidad": 1
+  }
+  ```
+
+---
+
+## 5. Implementación de Lombok al 100 %
+
+En cumplimiento de las buenas prácticas de desarrollo:
+- Ninguna clase contiene constructores escritos a mano, métodos getters/setters manuales ni métodos `toString` redundantes.
+- En las entidades JPA (`Producto`, `Pedido`, `DetallePedido`) se implementaron `@Getter`, `@Setter`, `@NoArgsConstructor`, `@AllArgsConstructor` y `@Builder`. Se evitó `@Data` para prevenir ciclos recursivos infinitos y conflictos con proxies Hibernate.
+- Los atributos con inicializadores usan `@Builder.Default`.
+- Las relaciones bidireccionales utilizan `@JsonManagedReference` y `@JsonBackReference`.
+- La inyección de dependencias en servicios y controladores se realiza por constructor inmutable mediante `@RequiredArgsConstructor` sobre campos `private final`, prescindiendo completamente de `@Autowired` sobre atributos.
+
+---
+
+## 6. Documentación Javadoc
+
+Todas las clases y métodos públicos cuentan con comentarios Javadoc completos que describen su objetivo, parámetros (`@param`), valores de retorno (`@return`) y excepciones arrojadas (`@throws`).
+Para generar el reporte HTML de Javadoc:
+```bash
+./mvnw javadoc:javadoc
+```
+Los archivos se encontrarán en el directorio `target/site/apidocs/index.html`.
+
+---
+
+## 7. Pruebas y Colección de Postman
+
+El proyecto incluye el archivo `TiendaYa_API.postman_collection.json` con los 25 casos de prueba listos para importar en Postman o Thunder Client, organizados en las carpetas **Productos** y **Pedidos**.
+
+---
+
+## 8. Autor(es)
+
+- **Aprendiz:** Brayan Gómez (Juan Diego Brayan)
+- **Ficha / Programa:** Análisis y Desarrollo de Software / Ingeniería de Software - Electiva 1
+- **Fecha:** Octubre de 2026

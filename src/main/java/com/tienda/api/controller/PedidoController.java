@@ -1,5 +1,4 @@
 package com.tienda.api.controller;
-
 import com.tienda.api.dto.ItemRequest;
 import com.tienda.api.dto.PedidoRequest;
 import com.tienda.api.model.Pedido;
@@ -19,7 +18,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
- */
 @RestController
 @RequestMapping("/api/pedidos")
 @RequiredArgsConstructor
